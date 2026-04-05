@@ -157,28 +157,7 @@ html, body {
   opacity: 0.6;
 }
 
-/* ---- Hint "toca para ver" ---- */
-#tap-hint {
-  position: fixed;
-  bottom: 2rem;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 5;
-  color: var(--text-muted);
-  font-size: 0.85rem;
-  opacity: 0;
-  animation: fadeInHint 1s 2s forwards;
-  pointer-events: none;
-  transition: opacity 0.4s;
-}
 
-#tap-hint.hidden {
-  opacity: 0 !important;
-}
-
-@keyframes fadeInHint {
-  to { opacity: 1; }
-}
 
 /* ---- Loading ---- */
 #loading {

@@ -95,54 +95,70 @@ function drawBackground() {
   canvas.height = H;
   const ctx = canvas.getContext('2d');
 
-  // Shanshui mountains (ink wash style)
-  drawMountainLayer(ctx, W, H, H * 0.72, H * 0.22, 'rgba(18, 22, 50, 0.7)', 5);
-  drawMountainLayer(ctx, W, H, H * 0.78, H * 0.15, 'rgba(14, 17, 42, 0.6)', 4);
-  drawMountainLayer(ctx, W, H, H * 0.85, H * 0.10, 'rgba(11, 14, 35, 0.5)', 3);
+  // Shanshui mountains (ink wash style) — distant, mid, close
+  // Distant range (faint, tall peaks)
+  drawMountainLayer(ctx, W, H, H * 0.62, H * 0.25, 'rgba(20, 24, 55, 0.35)', 3, 0);
+  // Mist
+  const mist1 = ctx.createLinearGradient(0, H * 0.55, 0, H * 0.72);
+  mist1.addColorStop(0, 'rgba(14, 16, 40, 0)');
+  mist1.addColorStop(0.5, 'rgba(14, 16, 40, 0.25)');
+  mist1.addColorStop(1, 'rgba(14, 16, 40, 0)');
+  ctx.fillStyle = mist1;
+  ctx.fillRect(0, H * 0.55, W, H * 0.17);
 
-  // Subtle mist between layers
-  const mist = ctx.createLinearGradient(0, H * 0.7, 0, H * 0.9);
-  mist.addColorStop(0, 'rgba(20, 22, 56, 0)');
-  mist.addColorStop(0.5, 'rgba(20, 22, 56, 0.15)');
-  mist.addColorStop(1, 'rgba(20, 22, 56, 0)');
-  ctx.fillStyle = mist;
-  ctx.fillRect(0, H * 0.7, W, H * 0.2);
+  // Mid range
+  drawMountainLayer(ctx, W, H, H * 0.72, H * 0.20, 'rgba(16, 19, 48, 0.55)', 5, 1.5);
+  // Mist
+  const mist2 = ctx.createLinearGradient(0, H * 0.68, 0, H * 0.82);
+  mist2.addColorStop(0, 'rgba(12, 14, 38, 0)');
+  mist2.addColorStop(0.4, 'rgba(12, 14, 38, 0.3)');
+  mist2.addColorStop(1, 'rgba(12, 14, 38, 0)');
+  ctx.fillStyle = mist2;
+  ctx.fillRect(0, H * 0.68, W, H * 0.14);
 
-  // Stars (sparse, golden)
-  for (let i = 0; i < 50; i++) {
+  // Close range (darker, more defined)
+  drawMountainLayer(ctx, W, H, H * 0.82, H * 0.14, 'rgba(10, 12, 32, 0.75)', 4, 3);
+  // Foreground hills
+  drawMountainLayer(ctx, W, H, H * 0.90, H * 0.08, 'rgba(8, 10, 26, 0.85)', 6, 5);
+
+  // Stars (sparse, golden, only in sky)
+  for (let i = 0; i < 60; i++) {
     const x = Math.random() * W;
-    const y = Math.random() * H * 0.75; // only above mountains
-    const r = Math.random() * 1.0 + 0.2;
-    const alpha = Math.random() * 0.5 + 0.1;
+    const y = Math.random() * H * 0.6;
+    const r = Math.random() * 1.2 + 0.2;
+    const alpha = Math.random() * 0.5 + 0.15;
     ctx.beginPath();
     ctx.arc(x, y, r, 0, Math.PI * 2);
     ctx.fillStyle = `rgba(212, 175, 55, ${alpha})`;
     ctx.fill();
   }
 
-  // Moon hint (very subtle circle)
+  // Moon (subtle glow)
+  const moonX = W * 0.78;
+  const moonY = H * 0.12;
+  const moonGrad = ctx.createRadialGradient(moonX, moonY, 0, moonX, moonY, 60);
+  moonGrad.addColorStop(0, 'rgba(212, 175, 55, 0.06)');
+  moonGrad.addColorStop(0.5, 'rgba(212, 175, 55, 0.02)');
+  moonGrad.addColorStop(1, 'rgba(212, 175, 55, 0)');
+  ctx.fillStyle = moonGrad;
+  ctx.fillRect(moonX - 60, moonY - 60, 120, 120);
   ctx.beginPath();
-  ctx.arc(W * 0.8, H * 0.15, 30, 0, Math.PI * 2);
-  ctx.fillStyle = 'rgba(212, 175, 55, 0.04)';
+  ctx.arc(moonX, moonY, 18, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(212, 175, 55, 0.08)';
   ctx.fill();
-  ctx.strokeStyle = 'rgba(212, 175, 55, 0.08)';
-  ctx.lineWidth = 1;
-  ctx.stroke();
 }
 
-function drawMountainLayer(ctx, W, H, baseY, maxHeight, color, peaks) {
+function drawMountainLayer(ctx, W, H, baseY, maxHeight, color, peaks, seed) {
   ctx.beginPath();
   ctx.moveTo(0, H);
-  ctx.lineTo(0, baseY);
 
-  const step = W / (peaks * 20);
+  const step = Math.max(1, W / (peaks * 30));
   for (let x = 0; x <= W; x += step) {
-    const progress = x / W;
-    // Multiple sine waves for organic mountain shapes
+    const p = x / W;
     const y = baseY
-      - Math.sin(progress * Math.PI * peaks) * maxHeight * 0.6
-      - Math.sin(progress * Math.PI * peaks * 2.3 + 1) * maxHeight * 0.25
-      - Math.sin(progress * Math.PI * peaks * 0.7 + 2) * maxHeight * 0.15;
+      - Math.pow(Math.sin(p * Math.PI * peaks + seed), 2) * maxHeight * 0.5
+      - Math.sin(p * Math.PI * peaks * 2.1 + seed + 1.3) * maxHeight * 0.2
+      - Math.max(0, Math.sin(p * Math.PI * peaks * 0.6 + seed + 4)) * maxHeight * 0.3;
     ctx.lineTo(x, y);
   }
 
@@ -167,25 +183,24 @@ function toggleState() {
     const tilt = deviceGroup ? deviceGroup.rotation.x : 0;
 
     if (tilt > TILT_CAP_THRESHOLD) {
-      // Looking at top → zoom to top bagua cap
+      // Looking at top → zoom directly above to see Xiantian bagua
       state = 'CAP_VIEW';
-      cameraTarget.set(0, 3.0, 1.5);
-      lookTarget.set(0, 0.5, 0);
-      document.getElementById('tap-hint')?.classList.add('hidden');
+      targetTiltX = Math.PI / 2 - 0.15; // almost flat, looking straight down
+      cameraTarget.set(0, 4.0, 0.8);
+      lookTarget.set(0, 0.55, 0); // look at upper prism cap
     } else if (tilt < -TILT_CAP_THRESHOLD) {
-      // Looking at bottom → zoom to bottom bagua cap
+      // Looking at bottom → zoom below to see Houtian bagua
       state = 'CAP_VIEW';
-      cameraTarget.set(0, -2.0, 1.5);
-      lookTarget.set(0, -0.5, 0);
-      document.getElementById('tap-hint')?.classList.add('hidden');
+      targetTiltX = -(Math.PI / 2 - 0.15);
+      cameraTarget.set(0, -3.0, 0.8);
+      lookTarget.set(0, -0.55, 0);
     } else {
       // Normal tap → show hexagram result
       state = 'DETAIL';
       deviceTargetY = DEVICE_Y_DETAIL;
-      targetTiltX = DEFAULT_TILT; // reset tilt to neutral
+      targetTiltX = DEFAULT_TILT;
       lookTarget.set(0, DEVICE_Y_DETAIL * 0.5, 0);
       showPanel();
-      document.getElementById('tap-hint')?.classList.add('hidden');
     }
   } else {
     state = 'EXPLORE';
@@ -204,8 +219,8 @@ function animate() {
   // Move device group smoothly
   if (deviceGroup) {
     deviceGroup.position.y += (deviceTargetY - deviceGroup.position.y) * 0.08;
-    // Smooth tilt reset (only in DETAIL/returning to EXPLORE)
-    if (state !== 'EXPLORE') {
+    // Smooth tilt (in DETAIL/CAP_VIEW, smoothly animate to target)
+    if (state === 'DETAIL' || state === 'CAP_VIEW') {
       deviceGroup.rotation.x += (targetTiltX - deviceGroup.rotation.x) * 0.06;
     }
   }
