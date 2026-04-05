@@ -8,17 +8,22 @@ import { TouchHandler } from './touch.js';
 import { initHexagramDisplay, updateHexagram, showPanel, hidePanel } from './hexagram.js';
 
 // ---- State ----
-let state = 'EXPLORE'; // 'EXPLORE' | 'DETAIL'
+let state = 'EXPLORE';
 
-// ---- Camera targets ----
-const CAM_EXPLORE = new THREE.Vector3(0, 0.3, 5.5);
-const CAM_DETAIL = new THREE.Vector3(0, 1.8, 4.5);
-const LOOK_EXPLORE = new THREE.Vector3(0, 0, 0);
-const LOOK_DETAIL = new THREE.Vector3(0, 0.6, 0);
+// ---- Responsive ----
+const isMobile = window.innerWidth < 768;
 
-let cameraTarget = CAM_EXPLORE.clone();
-let lookTarget = LOOK_EXPLORE.clone();
-let currentLook = LOOK_EXPLORE.clone();
+// Camera stays roughly the same angle — we move the DEVICE up/down
+const CAM_POS = new THREE.Vector3(0, 0.5, isMobile ? 7.0 : 5.0);
+const LOOK_AT = new THREE.Vector3(0, 0, 0);
+
+// Device Y position targets
+const DEVICE_Y_EXPLORE = 0;
+const DEVICE_Y_DETAIL = isMobile ? 2.5 : 2.0;
+
+let deviceTargetY = DEVICE_Y_EXPLORE;
+let currentLook = LOOK_AT.clone();
+let lookTarget = LOOK_AT.clone();
 
 // ---- Scene setup ----
 const container = document.getElementById('canvas-container');
@@ -26,52 +31,35 @@ const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.outputColorSpace = THREE.SRGBColorSpace;
-renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.8;
 container.appendChild(renderer.domElement);
 
 const scene = new THREE.Scene();
 
 const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 100);
-camera.position.copy(CAM_EXPLORE);
-
-// ---- Lighting ----
-scene.add(new THREE.AmbientLight(0xffffff, 2.0));
-
-// Key light from front-above
-const keyLight = new THREE.DirectionalLight(0xffffff, 2.0);
-keyLight.position.set(0, 2, 6);
-scene.add(keyLight);
-
-// Fill from left
-const fillLight = new THREE.DirectionalLight(0xffffff, 1.0);
-fillLight.position.set(-4, 0, 3);
-scene.add(fillLight);
-
-// Warm rim from below
-const rimLight = new THREE.DirectionalLight(0xd4af37, 0.5);
-rimLight.position.set(0, -3, 2);
-scene.add(rimLight);
+camera.position.copy(CAM_POS);
 
 // ---- Build prisms ----
 let upperPrism, lowerPrism, deviceGroup;
 
 async function init() {
-  // Wait for Chinese font
   await document.fonts.ready;
 
-  upperPrism = new OctagonalPrism(XIANTIAN_ORDER, { radius: 1.0, height: 1.0 });
-  lowerPrism = new OctagonalPrism(HOUTIAN_ORDER, { radius: 1.0, height: 1.0 });
+  upperPrism = new OctagonalPrism(XIANTIAN_ORDER, {
+    radius: 1.0, height: 0.9, label: '先天'
+  });
+  lowerPrism = new OctagonalPrism(HOUTIAN_ORDER, {
+    radius: 1.0, height: 0.9, label: '後天'
+  });
 
-  upperPrism.group.position.y = 0.6;
-  lowerPrism.group.position.y = -0.6;
+  upperPrism.group.position.y = 0.55;
+  lowerPrism.group.position.y = -0.55;
 
   deviceGroup = new THREE.Group();
   deviceGroup.add(upperPrism.group);
   deviceGroup.add(lowerPrism.group);
 
-  // Slight tilt for visual interest
-  deviceGroup.rotation.x = 0.08;
+  // Slight tilt for 3D depth
+  deviceGroup.rotation.x = 0.12;
 
   scene.add(deviceGroup);
 
@@ -81,10 +69,7 @@ async function init() {
 
   // ---- Touch ----
   new TouchHandler(renderer.domElement, upperPrism, lowerPrism, {
-    onSnap: () => {
-      // Wait a tick for snap to settle, then refresh
-      setTimeout(refreshHexagram, 50);
-    },
+    onSnap: () => setTimeout(refreshHexagram, 50),
     onTap: toggleState,
   });
 
@@ -93,7 +78,6 @@ async function init() {
   loading.classList.add('hidden');
   setTimeout(() => loading.remove(), 600);
 
-  // ---- Start loop ----
   animate();
 }
 
@@ -106,14 +90,14 @@ function refreshHexagram() {
 function toggleState() {
   if (state === 'EXPLORE') {
     state = 'DETAIL';
-    cameraTarget.copy(CAM_DETAIL);
-    lookTarget.copy(LOOK_DETAIL);
+    deviceTargetY = DEVICE_Y_DETAIL;
+    lookTarget.set(0, DEVICE_Y_DETAIL * 0.5, 0);
     showPanel();
     document.getElementById('tap-hint')?.classList.add('hidden');
   } else {
     state = 'EXPLORE';
-    cameraTarget.copy(CAM_EXPLORE);
-    lookTarget.copy(LOOK_EXPLORE);
+    deviceTargetY = DEVICE_Y_EXPLORE;
+    lookTarget.set(0, 0, 0);
     hidePanel();
   }
 }
@@ -124,24 +108,27 @@ let idleAngle = 0;
 function animate() {
   requestAnimationFrame(animate);
 
-  // Smooth camera movement
-  camera.position.lerp(cameraTarget, 0.06);
+  // Move device group up/down smoothly
+  if (deviceGroup) {
+    deviceGroup.position.y += (deviceTargetY - deviceGroup.position.y) * 0.08;
+  }
+
+  // Smooth lookAt follows device
   currentLook.lerp(lookTarget, 0.06);
   camera.lookAt(currentLook);
 
-  // Update prism snapping
+  // Prism snap animation
   upperPrism.update();
   lowerPrism.update();
 
-  // Continuously refresh hexagram during snapping
   if (upperPrism.isSnapping || lowerPrism.isSnapping) {
     refreshHexagram();
   }
 
-  // Idle rotation in EXPLORE mode (very subtle)
+  // Subtle idle sway in EXPLORE
   if (state === 'EXPLORE' && deviceGroup) {
     idleAngle += 0.003;
-    deviceGroup.rotation.y = Math.sin(idleAngle) * 0.15;
+    deviceGroup.rotation.y = Math.sin(idleAngle) * 0.12;
   }
 
   renderer.render(scene, camera);
