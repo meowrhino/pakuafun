@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Boceto — Prismas Pakua (desplegado)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #1a1a2e;
+      color: #e8e1d5;
+      font-family: 'Noto Serif SC', Georgia, serif;
+      padding: 2rem 1rem;
+    }
+    h1 { text-align: center; color: #d4af37; font-size: 1.4rem; margin-bottom: 0.5rem; }
+    h2 { text-align: center; color: #d4af37; font-size: 1.1rem; margin: 2rem 0 1rem; }
+    .subtitle { text-align: center; color: #8a8577; font-size: 0.85rem; margin-bottom: 2rem; }
+    .note { text-align: center; color: #8a8577; font-size: 0.75rem; margin: 0.5rem 0; font-style: italic; }
+
+    /* ---- Net layout ---- */
+    .net {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 1rem auto;
+      max-width: 700px;
+    }
+
+    /* Octagonal cap */
+    .cap {
+      width: 200px;
+      height: 200px;
+      position: relative;
+      margin: 0.5rem 0;
+    }
+    .cap svg { width: 100%; height: 100%; }
+
+    /* Lateral strip: 8 square faces side by side */
+    .lateral-strip {
+      display: flex;
+      border: 2px dashed #d4af3766;
+      border-radius: 4px;
+      overflow: visible;
+    }
+    .face {
+      width: 80px;
+      height: 100px;
+      border: 1px solid #d4af3744;
+      background: #12132d;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      position: relative;
+    }
+    .face .trigram-lines {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+    }
+    .face .trigram-lines .line {
+      height: 4px;
+      border-radius: 1px;
+    }
+    .face .trigram-lines .line.yang {
+      width: 40px;
+      background: #d4af37;
+    }
+    .face .trigram-lines .line.yin {
+      width: 40px;
+      background: transparent;
+      display: flex;
+      justify-content: space-between;
+    }
+    .face .trigram-lines .line.yin::before,
+    .face .trigram-lines .line.yin::after {
+      content: '';
+      width: 16px;
+      height: 4px;
+      background: #d4af37;
+      border-radius: 1px;
+    }
+    .face .name {
+      font-size: 0.65rem;
+      color: #d4af37;
+      text-align: center;
+      line-height: 1.2;
+    }
+    .face .chinese {
+      font-size: 1.1rem;
+      color: #d4af37;
+    }
+    .face .index {
+      position: absolute;
+      top: 2px;
+      left: 4px;
+      font-size: 0.55rem;
+      color: #8a857744;
+    }
+
+    /* Tab marks */
+    .tab-mark {
+      text-align: center;
+      color: #8a857744;
+      font-size: 0.6rem;
+      letter-spacing: 0.15em;
+      margin: 0.2rem 0;
+    }
+
+    /* Arrow between prisms */
+    .connector {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 1.5rem 0;
+      color: #d4af37;
+      font-size: 0.8rem;
+    }
+    .connector .arrow { font-size: 1.5rem; }
+
+    /* Legend */
+    .legend {
+      margin: 2rem auto;
+      max-width: 600px;
+      background: #12132d;
+      border: 1px solid #d4af3733;
+      border-radius: 8px;
+      padding: 1.2rem;
+      font-size: 0.8rem;
+      line-height: 1.6;
+    }
+    .legend h3 {
+      color: #d4af37;
+      margin-bottom: 0.5rem;
+      font-size: 0.9rem;
+    }
+    .legend ul { padding-left: 1.2rem; }
+    .legend li { margin-bottom: 0.3rem; }
+    .legend .highlight { color: #d4af37; }
+
+    /* Pakua mini on caps */
+    .pakua-label {
+      font-size: 0.5rem;
+      fill: #d4af37;
+      text-anchor: middle;
+      dominant-baseline: central;
+    }
+    .pakua-symbol {
+      font-size: 0.65rem;
+      fill: #e8e1d5;
+      text-anchor: middle;
+      dominant-baseline: central;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Prismas Pakua — Desplegado (Net)</h1>
+<p class="subtitle">Recortable para visualizar la estructura 3D</p>
+
+<!-- ============ PRISMA SUPERIOR: PAKUA ANTERIOR (XIANTIAN) ============ -->
+<h2>PRISMA SUPERIOR — Pakua Anterior (先天 Xiantian / Fu Xi)</h2>
+
+<div class="net">
+  <!-- Tapa superior octogonal -->
+  <p class="note">▲ Tapa SUPERIOR — Pakua Anterior completo</p>
+  <div class="cap">
+    <svg viewBox="0 0 200 200">
+      <!-- Octagon -->
+      <polygon points="100,15 158,38 185,100 158,162 100,185 42,162 15,100 42,38"
+               fill="#12132d" stroke="#d4af37" stroke-width="1.5" stroke-opacity="0.5"/>
+      <!-- Trigram positions: S(bottom), SW, W, NW, N(top), NE, E, SE -->
+      <!-- N = top of octagon -->
+      <text x="100" y="32" class="pakua-symbol">☷</text>
+      <text x="100" y="22" class="pakua-label">Kun</text>
+      <!-- NE -->
+      <text x="148" y="50" class="pakua-symbol">☳</text>
+      <text x="148" y="40" class="pakua-label">Zhen</text>
+      <!-- E -->
+      <text x="175" y="100" class="pakua-symbol">☲</text>
+      <text x="175" y="90" class="pakua-label">Li</text>
+      <!-- SE -->
+      <text x="148" y="152" class="pakua-symbol">☱</text>
+      <text x="148" y="162" class="pakua-label">Dui</text>
+      <!-- S = bottom of octagon -->
+      <text x="100" y="172" class="pakua-symbol">☰</text>
+      <text x="100" y="182" class="pakua-label">Qian</text>
+      <!-- SW -->
+      <text x="52" y="152" class="pakua-symbol">☴</text>
+      <text x="52" y="162" class="pakua-label">Xun</text>
+      <!-- W -->
+      <text x="25" y="100" class="pakua-symbol">☵</text>
+      <text x="25" y="90" class="pakua-label">Kan</text>
+      <!-- NW -->
+      <text x="52" y="50" class="pakua-symbol">☶</text>
+      <text x="52" y="40" class="pakua-label">Gen</text>
+      <!-- Center label -->
+      <text x="100" y="100" fill="#d4af3766" font-size="8" text-anchor="middle" dominant-baseline="central">先天</text>
+    </svg>
+  </div>
+
+  <p class="tab-mark">── doblar ──</p>
+
+  <!-- 8 caras laterales -->
+  <div class="lateral-strip" id="xiantian-faces"></div>
+
+  <p class="tab-mark">── doblar ──</p>
+
+  <!-- Tapa inferior octogonal (misma disposición) -->
+  <p class="note">▼ Tapa INFERIOR — Pakua Anterior completo (mismo)</p>
+  <div class="cap">
+    <svg viewBox="0 0 200 200">
+      <polygon points="100,15 158,38 185,100 158,162 100,185 42,162 15,100 42,38"
+               fill="#12132d" stroke="#d4af37" stroke-width="1.5" stroke-opacity="0.5"/>
+      <text x="100" y="32" class="pakua-symbol">☷</text>
+      <text x="148" y="50" class="pakua-symbol">☳</text>
+      <text x="175" y="100" class="pakua-symbol">☲</text>
+      <text x="148" y="152" class="pakua-symbol">☱</text>
+      <text x="100" y="172" class="pakua-symbol">☰</text>
+      <text x="52" y="152" class="pakua-symbol">☴</text>
+      <text x="25" y="100" class="pakua-symbol">☵</text>
+      <text x="52" y="50" class="pakua-symbol">☶</text>
+      <text x="100" y="100" fill="#d4af3766" font-size="8" text-anchor="middle" dominant-baseline="central">先天</text>
+    </svg>
+  </div>
+</div>
+
+<!-- ============ CONECTOR ============ -->
+<div class="connector">
+  <span>Conectados por el centro</span>
+  <span class="arrow">⇅</span>
+  <span>Giran independientemente</span>
+</div>
+
+<!-- ============ PRISMA INFERIOR: PAKUA POSTERIOR (HOUTIAN) ============ -->
+<h2>PRISMA INFERIOR — Pakua Posterior (後天 Houtian / Rey Wen)</h2>
+
+<div class="net">
+  <p class="note">▲ Tapa SUPERIOR — Pakua Posterior completo</p>
+  <div class="cap">
+    <svg viewBox="0 0 200 200">
+      <polygon points="100,15 158,38 185,100 158,162 100,185 42,162 15,100 42,38"
+               fill="#12132d" stroke="#d4af37" stroke-width="1.5" stroke-opacity="0.3"/>
+      <!-- Houtian: S=Li, SW=Kun, W=Dui, NW=Qian, N=Kan, NE=Gen, E=Zhen, SE=Xun -->
+      <text x="100" y="32" class="pakua-symbol">☵</text>
+      <text x="100" y="22" class="pakua-label">Kan</text>
+      <text x="148" y="50" class="pakua-symbol">☶</text>
+      <text x="148" y="40" class="pakua-label">Gen</text>
+      <text x="175" y="100" class="pakua-symbol">☳</text>
+      <text x="175" y="90" class="pakua-label">Zhen</text>
+      <text x="148" y="152" class="pakua-symbol">☴</text>
+      <text x="148" y="162" class="pakua-label">Xun</text>
+      <text x="100" y="172" class="pakua-symbol">☲</text>
+      <text x="100" y="182" class="pakua-label">Li</text>
+      <text x="52" y="152" class="pakua-symbol">☷</text>
+      <text x="52" y="162" class="pakua-label">Kun</text>
+      <text x="25" y="100" class="pakua-symbol">☱</text>
+      <text x="25" y="90" class="pakua-label">Dui</text>
+      <text x="52" y="50" class="pakua-symbol">☰</text>
+      <text x="52" y="40" class="pakua-label">Qian</text>
+      <text x="100" y="100" fill="#d4af3766" font-size="8" text-anchor="middle" dominant-baseline="central">後天</text>
+    </svg>
+  </div>
+
+  <p class="tab-mark">── doblar ──</p>
+
+  <div class="lateral-strip" id="houtian-faces"></div>
+
+  <p class="tab-mark">── doblar ──</p>
+
+  <p class="note">▼ Tapa INFERIOR — Pakua Posterior completo (mismo)</p>
+  <div class="cap">
+    <svg viewBox="0 0 200 200">
+      <polygon points="100,15 158,38 185,100 158,162 100,185 42,162 15,100 42,38"
+               fill="#12132d" stroke="#d4af37" stroke-width="1.5" stroke-opacity="0.3"/>
+      <text x="100" y="32" class="pakua-symbol">☵</text>
+      <text x="148" y="50" class="pakua-symbol">☶</text>
+      <text x="175" y="100" class="pakua-symbol">☳</text>
+      <text x="148" y="152" class="pakua-symbol">☴</text>
+      <text x="100" y="172" class="pakua-symbol">☲</text>
+      <text x="52" y="152" class="pakua-symbol">☷</text>
+      <text x="25" y="100" class="pakua-symbol">☱</text>
+      <text x="52" y="50" class="pakua-symbol">☰</text>
+      <text x="100" y="100" fill="#d4af3766" font-size="8" text-anchor="middle" dominant-baseline="central">後天</text>
+    </svg>
+  </div>
+</div>
+
+<!-- ============ LEYENDA ============ -->
+<div class="legend">
+  <h3>Cómo funciona</h3>
+  <ul>
+    <li>Cada prisma tiene <span class="highlight">2 caras octogonales</span> (arriba y abajo) con el pakua completo en miniatura</li>
+    <li>Las <span class="highlight">8 caras cuadradas laterales</span> muestran cada una el trigrama correspondiente a su posición en el octógono</li>
+    <li>La cara lateral 0 (S) del prisma superior = ☰ Qian (Heaven) — corresponde a la posición Sur del Xiantian</li>
+    <li>La cara lateral 0 (S) del prisma inferior = ☲ Li (Fire) — corresponde a la posición Sur del Houtian</li>
+    <li>Al <span class="highlight">girar cada prisma independientemente</span>, la cara frontal de arriba + la cara frontal de abajo forman un hexagrama</li>
+    <li>Ej: Si arriba muestra ☰ Qian y abajo ☲ Li → Hexagrama 14: 大有 Dà Yǒu (Great Possession)</li>
+  </ul>
+</div>
+
+<script>
+  // Trigram data
+  const TRIGRAMS = {
+    qian: { lines: [1,1,1], symbol: '☰', chinese: '乾', english: 'Heaven' },
+    dui:  { lines: [1,1,0], symbol: '☱', chinese: '兌', english: 'Lake' },
+    li:   { lines: [1,0,1], symbol: '☲', chinese: '離', english: 'Fire' },
+    zhen: { lines: [0,0,1], symbol: '☳', chinese: '震', english: 'Thunder' },
+    xun:  { lines: [0,1,1], symbol: '☴', chinese: '巽', english: 'Wind' },
+    kan:  { lines: [0,1,0], symbol: '☵', chinese: '坎', english: 'Water' },
+    gen:  { lines: [1,0,0], symbol: '☶', chinese: '艮', english: 'Mountain' },
+    kun:  { lines: [0,0,0], symbol: '☷', chinese: '坤', english: 'Earth' },
+  };
+
+  // Xiantian order (S, SW, W, NW, N, NE, E, SE) matching the octagonal caps above
+  const XIANTIAN = ['qian','xun','kan','gen','kun','zhen','li','dui'];
+  const DIRECTIONS_XT = ['S','SW','W','NW','N','NE','E','SE'];
+
+  // Houtian order
+  const HOUTIAN = ['li','kun','dui','qian','kan','gen','zhen','xun'];
+  const DIRECTIONS_HT = ['S','SW','W','NW','N','NE','E','SE'];
+
+  function buildFaces(containerId, order, directions) {
+    const container = document.getElementById(containerId);
+    order.forEach((key, i) => {
+      const t = TRIGRAMS[key];
+      const face = document.createElement('div');
+      face.className = 'face';
+
+      // Index
+      const idx = document.createElement('span');
+      idx.className = 'index';
+      idx.textContent = `${i} (${directions[i]})`;
+      face.appendChild(idx);
+
+      // Chinese
+      const ch = document.createElement('span');
+      ch.className = 'chinese';
+      ch.textContent = t.chinese;
+      face.appendChild(ch);
+
+      // Trigram lines (top to bottom = reversed)
+      const linesDiv = document.createElement('div');
+      linesDiv.className = 'trigram-lines';
+      [...t.lines].reverse().forEach(l => {
+        const line = document.createElement('div');
+        line.className = `line ${l === 1 ? 'yang' : 'yin'}`;
+        linesDiv.appendChild(line);
+      });
+      face.appendChild(linesDiv);
+
+      // Name
+      const name = document.createElement('span');
+      name.className = 'name';
+      name.textContent = t.english;
+      face.appendChild(name);
+
+      container.appendChild(face);
+    });
+  }
+
+  buildFaces('xiantian-faces', XIANTIAN, DIRECTIONS_XT);
+  buildFaces('houtian-faces', HOUTIAN, DIRECTIONS_HT);
+</script>
+</body>
+</html>
