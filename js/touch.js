@@ -1,17 +1,23 @@
 // ============================================================
-// touch.js — Pointer events para rotación independiente
+// touch.js — Pointer events: rotación horizontal por prisma
+//            + rotación vertical del artilugio entero
 // ============================================================
 
-const SENSITIVITY = 0.008;
-const TAP_THRESHOLD = 8; // px max para considerar tap
+const SENSITIVITY_X = 0.008;   // horizontal → rotate prism Y
+const SENSITIVITY_Y = 0.004;   // vertical → tilt device X
+const TAP_THRESHOLD = 8;
+const TILT_MIN = -0.6;  // max tilt looking from below
+const TILT_MAX = 0.8;   // max tilt looking from above
 
 export class TouchHandler {
-  constructor(canvas, upperPrism, lowerPrism, { onSnap, onTap }) {
+  constructor(canvas, upperPrism, lowerPrism, { onSnap, onTap, getState, getDeviceGroup }) {
     this.canvas = canvas;
     this.upperPrism = upperPrism;
     this.lowerPrism = lowerPrism;
     this.onSnap = onSnap;
     this.onTap = onTap;
+    this.getState = getState;
+    this.getDeviceGroup = getDeviceGroup;
 
     this.active = false;
     this.activePrism = null;
@@ -31,22 +37,37 @@ export class TouchHandler {
     this.startY = e.clientY;
     this.totalDrag = 0;
 
-    // Determine which prism: upper half of canvas → upper prism
-    const rect = this.canvas.getBoundingClientRect();
-    const relY = (e.clientY - rect.top) / rect.height;
-    this.activePrism = relY < 0.5 ? this.upperPrism : this.lowerPrism;
+    if (this.getState() === 'EXPLORE') {
+      const rect = this.canvas.getBoundingClientRect();
+      const relY = (e.clientY - rect.top) / rect.height;
+      this.activePrism = relY < 0.5 ? this.upperPrism : this.lowerPrism;
+    } else {
+      this.activePrism = null;
+    }
 
     this.canvas.setPointerCapture(e.pointerId);
   }
 
   _onMove(e) {
-    if (!this.active || !this.activePrism) return;
+    if (!this.active) return;
 
-    const deltaX = e.clientX - this.startX;
-    this.totalDrag += Math.abs(e.clientX - this.startX) + Math.abs(e.clientY - this.startY);
+    const dx = e.clientX - this.startX;
+    const dy = e.clientY - this.startY;
+    this.totalDrag += Math.abs(dx) + Math.abs(dy);
 
-    const deltaRadians = (e.clientX - this.startX) * SENSITIVITY;
-    this.activePrism.addRotation(deltaRadians);
+    if (this.getState() === 'EXPLORE') {
+      // Horizontal drag → rotate active prism
+      if (this.activePrism) {
+        this.activePrism.addRotation(dx * SENSITIVITY_X);
+      }
+
+      // Vertical drag → tilt entire device
+      const group = this.getDeviceGroup();
+      if (group) {
+        group.rotation.x = Math.max(TILT_MIN,
+          Math.min(TILT_MAX, group.rotation.x - dy * SENSITIVITY_Y));
+      }
+    }
 
     this.startX = e.clientX;
     this.startY = e.clientY;

@@ -82,14 +82,28 @@ export class OctagonalPrism {
 
     const capGeom = new THREE.ShapeGeometry(capShape);
 
+    // Fix UVs: ShapeGeometry creates UVs from shape coords (range ~[-r, r])
+    // Remap to [0, 1] centered
+    const uvAttr = capGeom.getAttribute('uv');
+    for (let i = 0; i < uvAttr.count; i++) {
+      const u = uvAttr.getX(i);
+      const v = uvAttr.getY(i);
+      uvAttr.setXY(i,
+        (u / this.radius + 1) / 2,
+        (v / this.radius + 1) / 2
+      );
+    }
+    uvAttr.needsUpdate = true;
+
     // Top cap
     const topCap = new THREE.Mesh(capGeom, new THREE.MeshBasicMaterial({ map: capTexture }));
     topCap.rotation.x = -Math.PI / 2;
     topCap.position.y = this.height / 2;
     this.rotatingGroup.add(topCap);
 
-    // Bottom cap
-    const botCap = new THREE.Mesh(capGeom.clone(), new THREE.MeshBasicMaterial({ map: capTexture2 }));
+    // Bottom cap (clone geometry so UVs are independent)
+    const capGeom2 = capGeom.clone();
+    const botCap = new THREE.Mesh(capGeom2, new THREE.MeshBasicMaterial({ map: capTexture2 }));
     botCap.rotation.x = Math.PI / 2;
     botCap.position.y = -this.height / 2;
     this.rotatingGroup.add(botCap);

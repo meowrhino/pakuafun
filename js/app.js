@@ -71,6 +71,8 @@ async function init() {
   new TouchHandler(renderer.domElement, upperPrism, lowerPrism, {
     onSnap: () => setTimeout(refreshHexagram, 50),
     onTap: toggleState,
+    getState: () => state,
+    getDeviceGroup: () => deviceGroup,
   });
 
   // ---- Hide loading ----
@@ -103,8 +105,6 @@ function toggleState() {
 }
 
 // ---- Animation loop ----
-let idleAngle = 0;
-
 function animate() {
   requestAnimationFrame(animate);
 
@@ -125,14 +125,9 @@ function animate() {
     refreshHexagram();
   }
 
-  // Subtle idle sway in EXPLORE
-  if (state === 'EXPLORE' && deviceGroup) {
-    idleAngle += 0.003;
-    deviceGroup.rotation.y = Math.sin(idleAngle) * 0.12;
-  }
-
   renderer.render(scene, camera);
 }
+
 
 // ---- Resize ----
 window.addEventListener('resize', () => {
