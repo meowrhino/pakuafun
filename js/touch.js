@@ -59,7 +59,7 @@ export class TouchHandler {
     if (this.getState() === 'EXPLORE') {
       // Horizontal drag → rotate active prism
       if (this.activePrism) {
-        this.activePrism.addRotation(dx * SENSITIVITY_X);
+        this.activePrism.addRotation(-dx * SENSITIVITY_X);
       }
 
       // Vertical drag → tilt entire device

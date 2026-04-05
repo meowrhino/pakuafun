@@ -19,7 +19,10 @@ const LOOK_AT = new THREE.Vector3(0, 0, 0);
 
 // Device Y position targets
 const DEVICE_Y_EXPLORE = 0;
-const DEVICE_Y_DETAIL = isMobile ? 2.5 : 2.0;
+const DEVICE_Y_DETAIL = isMobile ? 3.0 : 2.5;
+
+// Camera positions per state
+const CAM_DETAIL = new THREE.Vector3(0, isMobile ? 3.5 : 3.0, isMobile ? 7.0 : 5.0);
 
 let deviceTargetY = DEVICE_Y_EXPLORE;
 let cameraTarget = CAM_POS.clone();
@@ -174,34 +177,17 @@ function refreshHexagram() {
   updateHexagram(upperKey, lowerKey);
 }
 
-const TILT_CAP_THRESHOLD = 0.6;
 const DEFAULT_TILT = 0.12;
 let targetTiltX = DEFAULT_TILT;
 
 function toggleState() {
   if (state === 'EXPLORE') {
-    const tilt = deviceGroup ? deviceGroup.rotation.x : 0;
-
-    if (tilt > TILT_CAP_THRESHOLD) {
-      // Looking at top → zoom directly above to see Xiantian bagua
-      state = 'CAP_VIEW';
-      targetTiltX = Math.PI / 2 - 0.15; // almost flat, looking straight down
-      cameraTarget.set(0, 4.0, 0.8);
-      lookTarget.set(0, 0.55, 0); // look at upper prism cap
-    } else if (tilt < -TILT_CAP_THRESHOLD) {
-      // Looking at bottom → zoom below to see Houtian bagua
-      state = 'CAP_VIEW';
-      targetTiltX = -(Math.PI / 2 - 0.15);
-      cameraTarget.set(0, -3.0, 0.8);
-      lookTarget.set(0, -0.55, 0);
-    } else {
-      // Normal tap → show hexagram result
-      state = 'DETAIL';
-      deviceTargetY = DEVICE_Y_DETAIL;
-      targetTiltX = DEFAULT_TILT;
-      lookTarget.set(0, DEVICE_Y_DETAIL * 0.5, 0);
-      showPanel();
-    }
+    state = 'DETAIL';
+    deviceTargetY = DEVICE_Y_DETAIL;
+    targetTiltX = DEFAULT_TILT;
+    cameraTarget.copy(CAM_DETAIL);
+    lookTarget.set(0, DEVICE_Y_DETAIL, 0);
+    showPanel();
   } else {
     state = 'EXPLORE';
     deviceTargetY = DEVICE_Y_EXPLORE;
@@ -219,8 +205,8 @@ function animate() {
   // Move device group smoothly
   if (deviceGroup) {
     deviceGroup.position.y += (deviceTargetY - deviceGroup.position.y) * 0.08;
-    // Smooth tilt (in DETAIL/CAP_VIEW, smoothly animate to target)
-    if (state === 'DETAIL' || state === 'CAP_VIEW') {
+    // Smooth tilt reset in DETAIL
+    if (state === 'DETAIL') {
       deviceGroup.rotation.x += (targetTiltX - deviceGroup.rotation.x) * 0.06;
     }
   }
