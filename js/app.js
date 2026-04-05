@@ -22,6 +22,7 @@ const DEVICE_Y_EXPLORE = 0;
 const DEVICE_Y_DETAIL = isMobile ? 2.5 : 2.0;
 
 let deviceTargetY = DEVICE_Y_EXPLORE;
+let cameraTarget = CAM_POS.clone();
 let currentLook = LOOK_AT.clone();
 let lookTarget = LOOK_AT.clone();
 
@@ -75,6 +76,9 @@ async function init() {
     getDeviceGroup: () => deviceGroup,
   });
 
+  // ---- Stars background ----
+  drawStars();
+
   // ---- Hide loading ----
   const loading = document.getElementById('loading');
   loading.classList.add('hidden');
@@ -83,22 +87,60 @@ async function init() {
   animate();
 }
 
+function drawStars() {
+  const canvas = document.getElementById('stars');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  const ctx = canvas.getContext('2d');
+  for (let i = 0; i < 80; i++) {
+    const x = Math.random() * canvas.width;
+    const y = Math.random() * canvas.height;
+    const r = Math.random() * 1.2 + 0.3;
+    const alpha = Math.random() * 0.6 + 0.2;
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(212, 175, 55, ${alpha})`;
+    ctx.fill();
+  }
+}
+
 function refreshHexagram() {
   const upperKey = upperPrism.getFrontTrigramKey();
   const lowerKey = lowerPrism.getFrontTrigramKey();
   updateHexagram(upperKey, lowerKey);
 }
 
+// Tilt threshold: if tilted beyond this, zoom into cap instead of showing hexagram
+const TILT_CAP_THRESHOLD = 0.6;
+
 function toggleState() {
   if (state === 'EXPLORE') {
-    state = 'DETAIL';
-    deviceTargetY = DEVICE_Y_DETAIL;
-    lookTarget.set(0, DEVICE_Y_DETAIL * 0.5, 0);
-    showPanel();
-    document.getElementById('tap-hint')?.classList.add('hidden');
+    const tilt = deviceGroup ? deviceGroup.rotation.x : 0;
+
+    if (tilt > TILT_CAP_THRESHOLD) {
+      // Looking at top cap → zoom in to see Xiantian bagua
+      state = 'CAP_VIEW';
+      cameraTarget.set(0, 3.5, 2.0);
+      lookTarget.set(0, 0.5, 0);
+      document.getElementById('tap-hint')?.classList.add('hidden');
+    } else if (tilt < -TILT_CAP_THRESHOLD) {
+      // Looking at bottom cap → zoom in to see Houtian bagua
+      state = 'CAP_VIEW';
+      cameraTarget.set(0, -2.5, 2.0);
+      lookTarget.set(0, -0.5, 0);
+      document.getElementById('tap-hint')?.classList.add('hidden');
+    } else {
+      // Normal → show hexagram
+      state = 'DETAIL';
+      deviceTargetY = DEVICE_Y_DETAIL;
+      lookTarget.set(0, DEVICE_Y_DETAIL * 0.5, 0);
+      showPanel();
+      document.getElementById('tap-hint')?.classList.add('hidden');
+    }
   } else {
     state = 'EXPLORE';
     deviceTargetY = DEVICE_Y_EXPLORE;
+    cameraTarget.copy(CAM_POS);
     lookTarget.set(0, 0, 0);
     hidePanel();
   }
@@ -113,7 +155,8 @@ function animate() {
     deviceGroup.position.y += (deviceTargetY - deviceGroup.position.y) * 0.08;
   }
 
-  // Smooth lookAt follows device
+  // Smooth camera position and lookAt
+  camera.position.lerp(cameraTarget, 0.06);
   currentLook.lerp(lookTarget, 0.06);
   camera.lookAt(currentLook);
 

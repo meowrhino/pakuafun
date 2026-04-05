@@ -6,8 +6,8 @@
 const SENSITIVITY_X = 0.008;   // horizontal → rotate prism Y
 const SENSITIVITY_Y = 0.004;   // vertical → tilt device X
 const TAP_THRESHOLD = 8;
-const TILT_MIN = -0.6;  // max tilt looking from below
-const TILT_MAX = 0.8;   // max tilt looking from above
+const TILT_MIN = -1.0;  // max tilt looking from below
+const TILT_MAX = 1.2;   // max tilt looking from above
 
 export class TouchHandler {
   constructor(canvas, upperPrism, lowerPrism, { onSnap, onTap, getState, getDeviceGroup }) {
@@ -37,7 +37,8 @@ export class TouchHandler {
     this.startY = e.clientY;
     this.totalDrag = 0;
 
-    if (this.getState() === 'EXPLORE') {
+    const st = this.getState();
+    if (st === 'EXPLORE') {
       const rect = this.canvas.getBoundingClientRect();
       const relY = (e.clientY - rect.top) / rect.height;
       this.activePrism = relY < 0.5 ? this.upperPrism : this.lowerPrism;

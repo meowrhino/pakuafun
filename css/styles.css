@@ -12,10 +12,19 @@
 html, body {
   height: 100dvh;
   overflow: hidden;
-  background: var(--bg-color);
+  background: radial-gradient(ellipse at 50% 40%, #141638 0%, #0b0c1b 60%, #06060f 100%);
   color: var(--text-color);
   font-family: 'Noto Serif SC', 'Georgia', serif;
   -webkit-font-smoothing: antialiased;
+}
+
+/* Subtle stars background */
+#stars {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.4;
 }
 
 /* ---- Canvas 3D ---- */

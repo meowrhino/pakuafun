@@ -118,9 +118,13 @@ export class OctagonalPrism {
   }
 
   snapToNearest() {
-    const norm = ((this.actualRotationY % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
+    // Negate because positive group rotation brings negative-indexed faces to front
+    const negRot = -this.actualRotationY;
+    const norm = ((negRot % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
     this.currentFaceIndex = Math.round(norm / FACE_ANGLE) % NUM_SIDES;
-    this.targetRotationY = this.currentFaceIndex * FACE_ANGLE;
+
+    // Target rotation that aligns this face to front
+    this.targetRotationY = -(this.currentFaceIndex * FACE_ANGLE);
 
     // Shortest path
     const diff = this.targetRotationY - this.actualRotationY;
@@ -143,7 +147,8 @@ export class OctagonalPrism {
   }
 
   _updateFaceFromRotation() {
-    const norm = ((this.actualRotationY % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
+    const negRot = -this.actualRotationY;
+    const norm = ((negRot % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
     this.currentFaceIndex = Math.round(norm / FACE_ANGLE) % NUM_SIDES;
     this._updateHighlight();
   }

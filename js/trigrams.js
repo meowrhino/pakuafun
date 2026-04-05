@@ -4,7 +4,7 @@
 import * as THREE from 'three';
 import { TRIGRAMS } from './data.js';
 
-const SIZE = 512;
+const SIZE = 1024;
 const BG_COLOR = '#12132d';
 const BG_HIGHLIGHT = '#1c1e48';
 const LINE_COLOR = '#e8c547';
@@ -24,17 +24,17 @@ export function createTrigramTexture(trigram, highlighted = false) {
 
   // Border
   ctx.strokeStyle = LINE_COLOR;
-  ctx.lineWidth = 2;
+  ctx.lineWidth = 3;
   ctx.globalAlpha = highlighted ? 0.6 : 0.15;
-  ctx.strokeRect(8, 8, SIZE - 16, SIZE - 16);
+  ctx.strokeRect(16, 16, SIZE - 32, SIZE - 32);
   ctx.globalAlpha = 1;
 
   // Trigram lines (top-to-bottom = reverse of [bottom, middle, top])
-  const lineWidth = 260;
-  const lineHeight = 28;
-  const gapWidth = 44;
-  const startY = 140;
-  const lineSpacing = 58;
+  const lineWidth = 520;
+  const lineHeight = 56;
+  const gapWidth = 88;
+  const startY = 280;
+  const lineSpacing = 116;
   const x = (SIZE - lineWidth) / 2;
 
   ctx.fillStyle = LINE_COLOR;
@@ -42,30 +42,30 @@ export function createTrigramTexture(trigram, highlighted = false) {
   reversed.forEach((line, i) => {
     const y = startY + i * lineSpacing;
     if (line === 1) {
-      roundRect(ctx, x, y, lineWidth, lineHeight, 4);
+      roundRect(ctx, x, y, lineWidth, lineHeight, 8);
     } else {
       const segWidth = (lineWidth - gapWidth) / 2;
-      roundRect(ctx, x, y, segWidth, lineHeight, 4);
-      roundRect(ctx, x + segWidth + gapWidth, y, segWidth, lineHeight, 4);
+      roundRect(ctx, x, y, segWidth, lineHeight, 8);
+      roundRect(ctx, x + segWidth + gapWidth, y, segWidth, lineHeight, 8);
     }
   });
 
   // Chinese character
   ctx.fillStyle = TEXT_COLOR;
-  ctx.font = '700 56px "Noto Serif SC", serif';
+  ctx.font = '700 112px "Noto Serif SC", serif';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillText(trigram.chinese, SIZE / 2, 360);
+  ctx.fillText(trigram.chinese, SIZE / 2, 720);
 
   // English name
   ctx.fillStyle = TEXT_MUTED;
-  ctx.font = '24px "Noto Serif SC", Georgia, serif';
-  ctx.fillText(trigram.english, SIZE / 2, 420);
+  ctx.font = '48px "Noto Serif SC", Georgia, serif';
+  ctx.fillText(trigram.english, SIZE / 2, 840);
 
   // Element
-  ctx.font = '18px "Noto Serif SC", Georgia, serif';
+  ctx.font = '36px "Noto Serif SC", Georgia, serif';
   ctx.globalAlpha = 0.5;
-  ctx.fillText(trigram.element, SIZE / 2, 460);
+  ctx.fillText(trigram.element, SIZE / 2, 920);
   ctx.globalAlpha = 1;
 
   const texture = new THREE.CanvasTexture(canvas);
@@ -75,7 +75,7 @@ export function createTrigramTexture(trigram, highlighted = false) {
 
 // ---- Octagonal cap texture (bagua radial diagram) ----
 export function createBaguaCapTexture(trigramOrder, label) {
-  const S = 512;
+  const S = 1024;
   const canvas = document.createElement('canvas');
   canvas.width = S;
   canvas.height = S;
@@ -89,14 +89,14 @@ export function createBaguaCapTexture(trigramOrder, label) {
 
   // Outer octagon
   ctx.strokeStyle = LINE_COLOR;
-  ctx.lineWidth = 2.5;
+  ctx.lineWidth = 4;
   ctx.globalAlpha = 0.4;
   const octR = S * 0.46;
   drawOctagon(ctx, cx, cy, octR);
   ctx.globalAlpha = 1;
 
   // Inner octagon
-  ctx.lineWidth = 1;
+  ctx.lineWidth = 2;
   ctx.globalAlpha = 0.15;
   const innerR = S * 0.22;
   drawOctagon(ctx, cx, cy, innerR);
@@ -115,10 +115,10 @@ export function createBaguaCapTexture(trigramOrder, label) {
     ctx.translate(cx, cy);
     ctx.rotate(angle);
 
-    const lineW = 36;
-    const lineH = 5;
-    const gap = 10;
-    const gapBreak = 8;
+    const lineW = 72;
+    const lineH = 10;
+    const gap = 18;
+    const gapBreak = 14;
     const startDist = S * 0.26;
 
     ctx.fillStyle = LINE_COLOR;
@@ -139,7 +139,7 @@ export function createBaguaCapTexture(trigramOrder, label) {
   // Center label
   ctx.fillStyle = LINE_COLOR;
   ctx.globalAlpha = 0.2;
-  ctx.font = '700 24px "Noto Serif SC", serif';
+  ctx.font = '700 48px "Noto Serif SC", serif';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.fillText(label, cx, cy);
