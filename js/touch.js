@@ -1,13 +1,15 @@
 // ============================================================
 // touch.js — Pointer events: rotación horizontal por prisma
 //            + rotación vertical del artilugio entero
+// Gesture discrimination: lock to one axis after initial movement
 // ============================================================
 
-const SENSITIVITY_X = 0.008;   // horizontal → rotate prism Y
-const SENSITIVITY_Y = 0.004;   // vertical → tilt device X
+const SENSITIVITY_X = 0.008;
+const SENSITIVITY_Y = 0.005;
 const TAP_THRESHOLD = 8;
-const TILT_MIN = -1.0;  // max tilt looking from below
-const TILT_MAX = 1.2;   // max tilt looking from above
+const LOCK_THRESHOLD = 6;    // px to decide axis lock
+const TILT_MIN = -1.0;
+const TILT_MAX = 1.2;
 
 export class TouchHandler {
   constructor(canvas, upperPrism, lowerPrism, { onSnap, onTap, getState, getDeviceGroup }) {
@@ -21,8 +23,11 @@ export class TouchHandler {
 
     this.active = false;
     this.activePrism = null;
-    this.startX = 0;
-    this.startY = 0;
+    this.axis = null; // 'h' | 'v' | null (undecided)
+    this.originX = 0;
+    this.originY = 0;
+    this.prevX = 0;
+    this.prevY = 0;
     this.totalDrag = 0;
 
     canvas.addEventListener('pointerdown', this._onDown.bind(this));
@@ -33,12 +38,12 @@ export class TouchHandler {
 
   _onDown(e) {
     this.active = true;
-    this.startX = e.clientX;
-    this.startY = e.clientY;
+    this.originX = this.prevX = e.clientX;
+    this.originY = this.prevY = e.clientY;
     this.totalDrag = 0;
+    this.axis = null;
 
-    const st = this.getState();
-    if (st === 'EXPLORE') {
+    if (this.getState() === 'EXPLORE') {
       const rect = this.canvas.getBoundingClientRect();
       const relY = (e.clientY - rect.top) / rect.height;
       this.activePrism = relY < 0.5 ? this.upperPrism : this.lowerPrism;
@@ -51,18 +56,31 @@ export class TouchHandler {
 
   _onMove(e) {
     if (!this.active) return;
+    if (this.getState() !== 'EXPLORE') return;
 
-    const dx = e.clientX - this.startX;
-    const dy = e.clientY - this.startY;
+    const dx = e.clientX - this.prevX;
+    const dy = e.clientY - this.prevY;
     this.totalDrag += Math.abs(dx) + Math.abs(dy);
 
-    if (this.getState() === 'EXPLORE') {
-      // Horizontal drag → rotate active prism
-      if (this.activePrism) {
-        this.activePrism.addRotation(-dx * SENSITIVITY_X);
+    // Decide axis lock after some movement
+    if (!this.axis) {
+      const totalDx = Math.abs(e.clientX - this.originX);
+      const totalDy = Math.abs(e.clientY - this.originY);
+      if (totalDx > LOCK_THRESHOLD || totalDy > LOCK_THRESHOLD) {
+        this.axis = totalDx > totalDy ? 'h' : 'v';
+      } else {
+        this.prevX = e.clientX;
+        this.prevY = e.clientY;
+        return; // not enough movement yet
       }
+    }
 
-      // Vertical drag → tilt entire device
+    if (this.axis === 'h' && this.activePrism) {
+      // Horizontal: rotate prism
+      // Negate so drag-right = clockwise = right face comes to front
+      this.activePrism.addRotation(-dx * SENSITIVITY_X);
+    } else if (this.axis === 'v') {
+      // Vertical: tilt device
       const group = this.getDeviceGroup();
       if (group) {
         group.rotation.x = Math.max(TILT_MIN,
@@ -70,8 +88,8 @@ export class TouchHandler {
       }
     }
 
-    this.startX = e.clientX;
-    this.startY = e.clientY;
+    this.prevX = e.clientX;
+    this.prevY = e.clientY;
   }
 
   _onUp(e) {
@@ -80,11 +98,12 @@ export class TouchHandler {
 
     if (this.totalDrag < TAP_THRESHOLD) {
       this.onTap?.();
-    } else if (this.activePrism) {
+    } else if (this.axis === 'h' && this.activePrism) {
       this.activePrism.snapToNearest();
       this.onSnap?.();
     }
 
     this.activePrism = null;
+    this.axis = null;
   }
 }
