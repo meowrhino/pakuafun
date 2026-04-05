@@ -76,8 +76,8 @@ async function init() {
     getDeviceGroup: () => deviceGroup,
   });
 
-  // ---- Stars background ----
-  drawStars();
+  // ---- Background ----
+  drawBackground();
 
   // ---- Hide loading ----
   const loading = document.getElementById('loading');
@@ -87,21 +87,69 @@ async function init() {
   animate();
 }
 
-function drawStars() {
+function drawBackground() {
   const canvas = document.getElementById('stars');
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
+  const W = window.innerWidth;
+  const H = window.innerHeight;
+  canvas.width = W;
+  canvas.height = H;
   const ctx = canvas.getContext('2d');
-  for (let i = 0; i < 80; i++) {
-    const x = Math.random() * canvas.width;
-    const y = Math.random() * canvas.height;
-    const r = Math.random() * 1.2 + 0.3;
-    const alpha = Math.random() * 0.6 + 0.2;
+
+  // Shanshui mountains (ink wash style)
+  drawMountainLayer(ctx, W, H, H * 0.72, H * 0.22, 'rgba(18, 22, 50, 0.7)', 5);
+  drawMountainLayer(ctx, W, H, H * 0.78, H * 0.15, 'rgba(14, 17, 42, 0.6)', 4);
+  drawMountainLayer(ctx, W, H, H * 0.85, H * 0.10, 'rgba(11, 14, 35, 0.5)', 3);
+
+  // Subtle mist between layers
+  const mist = ctx.createLinearGradient(0, H * 0.7, 0, H * 0.9);
+  mist.addColorStop(0, 'rgba(20, 22, 56, 0)');
+  mist.addColorStop(0.5, 'rgba(20, 22, 56, 0.15)');
+  mist.addColorStop(1, 'rgba(20, 22, 56, 0)');
+  ctx.fillStyle = mist;
+  ctx.fillRect(0, H * 0.7, W, H * 0.2);
+
+  // Stars (sparse, golden)
+  for (let i = 0; i < 50; i++) {
+    const x = Math.random() * W;
+    const y = Math.random() * H * 0.75; // only above mountains
+    const r = Math.random() * 1.0 + 0.2;
+    const alpha = Math.random() * 0.5 + 0.1;
     ctx.beginPath();
     ctx.arc(x, y, r, 0, Math.PI * 2);
     ctx.fillStyle = `rgba(212, 175, 55, ${alpha})`;
     ctx.fill();
   }
+
+  // Moon hint (very subtle circle)
+  ctx.beginPath();
+  ctx.arc(W * 0.8, H * 0.15, 30, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(212, 175, 55, 0.04)';
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(212, 175, 55, 0.08)';
+  ctx.lineWidth = 1;
+  ctx.stroke();
+}
+
+function drawMountainLayer(ctx, W, H, baseY, maxHeight, color, peaks) {
+  ctx.beginPath();
+  ctx.moveTo(0, H);
+  ctx.lineTo(0, baseY);
+
+  const step = W / (peaks * 20);
+  for (let x = 0; x <= W; x += step) {
+    const progress = x / W;
+    // Multiple sine waves for organic mountain shapes
+    const y = baseY
+      - Math.sin(progress * Math.PI * peaks) * maxHeight * 0.6
+      - Math.sin(progress * Math.PI * peaks * 2.3 + 1) * maxHeight * 0.25
+      - Math.sin(progress * Math.PI * peaks * 0.7 + 2) * maxHeight * 0.15;
+    ctx.lineTo(x, y);
+  }
+
+  ctx.lineTo(W, H);
+  ctx.closePath();
+  ctx.fillStyle = color;
+  ctx.fill();
 }
 
 function refreshHexagram() {
@@ -110,29 +158,31 @@ function refreshHexagram() {
   updateHexagram(upperKey, lowerKey);
 }
 
-// Tilt threshold: if tilted beyond this, zoom into cap instead of showing hexagram
 const TILT_CAP_THRESHOLD = 0.6;
+const DEFAULT_TILT = 0.12;
+let targetTiltX = DEFAULT_TILT;
 
 function toggleState() {
   if (state === 'EXPLORE') {
     const tilt = deviceGroup ? deviceGroup.rotation.x : 0;
 
     if (tilt > TILT_CAP_THRESHOLD) {
-      // Looking at top cap → zoom in to see Xiantian bagua
+      // Looking at top → zoom to top bagua cap
       state = 'CAP_VIEW';
-      cameraTarget.set(0, 3.5, 2.0);
+      cameraTarget.set(0, 3.0, 1.5);
       lookTarget.set(0, 0.5, 0);
       document.getElementById('tap-hint')?.classList.add('hidden');
     } else if (tilt < -TILT_CAP_THRESHOLD) {
-      // Looking at bottom cap → zoom in to see Houtian bagua
+      // Looking at bottom → zoom to bottom bagua cap
       state = 'CAP_VIEW';
-      cameraTarget.set(0, -2.5, 2.0);
+      cameraTarget.set(0, -2.0, 1.5);
       lookTarget.set(0, -0.5, 0);
       document.getElementById('tap-hint')?.classList.add('hidden');
     } else {
-      // Normal → show hexagram
+      // Normal tap → show hexagram result
       state = 'DETAIL';
       deviceTargetY = DEVICE_Y_DETAIL;
+      targetTiltX = DEFAULT_TILT; // reset tilt to neutral
       lookTarget.set(0, DEVICE_Y_DETAIL * 0.5, 0);
       showPanel();
       document.getElementById('tap-hint')?.classList.add('hidden');
@@ -140,6 +190,7 @@ function toggleState() {
   } else {
     state = 'EXPLORE';
     deviceTargetY = DEVICE_Y_EXPLORE;
+    targetTiltX = DEFAULT_TILT;
     cameraTarget.copy(CAM_POS);
     lookTarget.set(0, 0, 0);
     hidePanel();
@@ -150,9 +201,13 @@ function toggleState() {
 function animate() {
   requestAnimationFrame(animate);
 
-  // Move device group up/down smoothly
+  // Move device group smoothly
   if (deviceGroup) {
     deviceGroup.position.y += (deviceTargetY - deviceGroup.position.y) * 0.08;
+    // Smooth tilt reset (only in DETAIL/returning to EXPLORE)
+    if (state !== 'EXPLORE') {
+      deviceGroup.rotation.x += (targetTiltX - deviceGroup.rotation.x) * 0.06;
+    }
   }
 
   // Smooth camera position and lookAt

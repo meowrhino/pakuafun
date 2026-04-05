@@ -136,13 +136,28 @@ export function createBaguaCapTexture(trigramOrder, label) {
     ctx.restore();
   }
 
-  // Center label
+  // Center circle + label
+  ctx.strokeStyle = LINE_COLOR;
+  ctx.lineWidth = 1.5;
+  ctx.globalAlpha = 0.15;
+  ctx.beginPath();
+  ctx.arc(cx, cy, S * 0.12, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.globalAlpha = 1;
+
+  // Main label (large Chinese)
   ctx.fillStyle = LINE_COLOR;
-  ctx.globalAlpha = 0.2;
-  ctx.font = '700 48px "Noto Serif SC", serif';
+  ctx.globalAlpha = 0.35;
+  ctx.font = '700 56px "Noto Serif SC", serif';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillText(label, cx, cy);
+  ctx.fillText(label, cx, cy - 10);
+
+  // Subtitle
+  const subtitle = label === '先天' ? 'Xiantian' : 'Houtian';
+  ctx.font = '28px Georgia, serif';
+  ctx.globalAlpha = 0.2;
+  ctx.fillText(subtitle, cx, cy + 32);
   ctx.globalAlpha = 1;
 
   const texture = new THREE.CanvasTexture(canvas);
