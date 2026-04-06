@@ -118,7 +118,7 @@ export class OctagonalPrism {
   }
 
   snapToNearest() {
-    // Negate because positive group rotation brings negative-indexed faces to front
+    // Negate because front face = (-rotation / FACE_ANGLE) in octagon geometry
     const negRot = -this.actualRotationY;
     const norm = ((negRot % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
     this.currentFaceIndex = Math.round(norm / FACE_ANGLE) % NUM_SIDES;

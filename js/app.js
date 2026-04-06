@@ -77,6 +77,7 @@ async function init() {
     onTap: toggleState,
     getState: () => state,
     getDeviceGroup: () => deviceGroup,
+    getCamera: () => camera,
   });
 
   // ---- Background ----
