@@ -21,7 +21,7 @@ export const XIANTIAN_ORDER = ['qian', 'xun', 'kan', 'gen', 'kun', 'zhen', 'li',
 // Pakua Posterior (Houtian / Rey Wen) — prisma inferior
 export const HOUTIAN_ORDER = ['li', 'kun', 'dui', 'qian', 'kan', 'gen', 'zhen', 'xun'];
 
-// Lookup: HEXAGRAM_LOOKUP[upper][lower] = número King Wen (1-64)
+// Lookup: HEXAGRAM_LOOKUP[lower][upper] = número King Wen (1-64)
 export const HEXAGRAM_LOOKUP = {
   qian: { qian:1,  dui:43, li:14, zhen:34, xun:9,  kan:5,  gen:26, kun:11 },
   dui:  { qian:10, dui:58, li:38, zhen:54, xun:61, kan:60, gen:41, kun:19 },

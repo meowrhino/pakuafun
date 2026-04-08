@@ -29,7 +29,7 @@ export function hidePanel() {
 export function updateHexagram(upperTrigramKey, lowerTrigramKey) {
   const upper = TRIGRAMS[upperTrigramKey];
   const lower = TRIGRAMS[lowerTrigramKey];
-  const hexNum = HEXAGRAM_LOOKUP[upperTrigramKey][lowerTrigramKey];
+  const hexNum = HEXAGRAM_LOOKUP[lowerTrigramKey][upperTrigramKey];
   const hex = HEXAGRAMS[hexNum];
 
   if (!hex) return;
